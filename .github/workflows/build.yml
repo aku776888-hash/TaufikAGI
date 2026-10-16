@@ -5,49 +5,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Create Project From Scratch
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.6
+
+      - name: Create Project
         run: |
-          rm -rf app build.gradle.kts settings.gradle.kts
+          rm -rf app build.gradle.kts settings.gradle.kts gradle gradlew
           mkdir -p app/src/main/java/com/taufikagi/app
           mkdir -p app/src/main/res/values
-          mkdir -p gradle/wrapper
-          
-          cat > settings.gradle.kts <<'EOF'
-          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
-          rootProject.name = "TaufikAGI"
-          include(":app")
-          EOF
-          
-          cat > build.gradle.kts <<'EOF'
-          plugins { id("com.android.application") version "8.2.2" apply false; id("org.jetbrains.kotlin.android") version "1.9.22" apply false; id("org.jetbrains.kotlin.plugin.compose") version "1.9.22" apply false }
-          EOF
-          
-          cat > gradle.properties <<'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          EOF
-          
-          cat > app/build.gradle.kts <<'EOF'
-          plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") }
-          android { namespace = "com.taufikagi.app"; compileSdk = 34; defaultConfig { applicationId = "com.taufikagi.app"; minSdk = 24; targetSdk = 34; versionCode = 1; versionName = "1.0" }; buildFeatures { compose = true }; composeOptions { kotlinCompilerExtensionVersion = "1.5.8" } }
-          dependencies { implementation("androidx.core:core-ktx:1.12.0"); implementation("androidx.compose.ui:ui:1.5.8"); implementation("androidx.compose.material3:material3:1.1.2"); implementation("androidx.activity:activity-compose:1.8.2") }
-          EOF
-          
-          cat > app/src/main/AndroidManifest.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-          <application android:label="TaufikAGI" android:theme="@android:style/Theme.Material.Light">
-          <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
-          </application>
-          </manifest>
-          EOF
-          
-          cat > app/src/main/res/values/strings.xml <<'EOF'
-          <resources><string name="app_name">TaufikAGI</string></resources>
-          EOF
-          
-          cat > app/src/main/java/com/taufikagi/app/MainActivity.kt <<'EOF'
+          printf 'pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }\ndependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }\nrootProject.name = "TaufikAGI"\ninclude(":app")' > settings.gradle.kts
+          printf 'plugins { id("com.android.application") version "8.2.2" apply false; id("org.jetbrains.kotlin.android") version "1.9.22" apply false }\n' > build.gradle.kts
+          printf 'org.gradle.jvmargs=-Xmx2048m\nandroid.useAndroidX=true\n' > gradle.properties
+          printf 'plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") version "1.9.22" }\nandroid { namespace = "com.taufikagi.app"; compileSdk = 34; defaultConfig { applicationId = "com.taufikagi.app"; minSdk = 24; targetSdk = 34; versionCode = 1; versionName = "1.0" }; buildFeatures { compose = true }; composeOptions { kotlinCompilerExtensionVersion = "1.5.8" } }\ndependencies { implementation("androidx.core:core-ktx:1.12.0"); implementation("androidx.compose.ui:ui:1.5.8"); implementation("androidx.compose.material3:material3:1.1.2"); implementation("androidx.activity:activity-compose:1.8.2") }\n' > app/build.gradle.kts
+          printf '<?xml version="1.0" encoding="utf-8"?><manifest xmlns:android="http://schemas.android.com/apk/res/android"><application android:label="TaufikAGI"><activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity></application></manifest>' > app/src/main/AndroidManifest.xml
+          printf '<resources><string name="app_name">TaufikAGI</string></resources>' > app/src/main/res/values/strings.xml
+          cat > app/src/main/java/com/taufikagi/app/MainActivity.kt <<'KT'
           package com.taufikagi.app
           import android.os.Bundle
           import androidx.activity.ComponentActivity
@@ -59,49 +38,30 @@ jobs:
           import androidx.compose.ui.Modifier
           import androidx.compose.ui.unit.dp
           class MainActivity : ComponentActivity() {
-            override fun onCreate(savedInstanceState: Bundle?) {
-              super.onCreate(savedInstanceState)
+            override fun onCreate(b: Bundle?) { super.onCreate(b)
               setContent {
                 MaterialTheme {
-                  var text by remember { mutableStateOf("") }
-                  var result by remember { mutableStateOf("TaufikAGI Siap Bos!") }
+                  var t by remember { mutableStateOf("") }
+                  var r by remember { mutableStateOf("TaufikAGI Siap Bos!") }
                   Surface(Modifier.fillMaxSize()) {
                     Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                       Text("TaufikAGI", style = MaterialTheme.typography.headlineLarge)
                       Spacer(Modifier.height(20.dp))
-                      TextField(value = text, onValueChange = { text = it }, label = { Text("Tanya AGI...") }, modifier = Modifier.fillMaxWidth())
+                      TextField(value = t, onValueChange = { t = it }, label = { Text("Tanya AGI...") }, modifier = Modifier.fillMaxWidth())
                       Spacer(Modifier.height(12.dp))
-                      Button(onClick = { result = "AGI Jawab: " + text.reversed() }, modifier = Modifier.fillMaxWidth()) { Text("TANYA") }
-                      Spacer(Modifier.height(20.dp))
-                      Text(result)
+                      Button(onClick = { r = "AGI: " + t.reversed() }, modifier = Modifier.fillMaxWidth()) { Text("TANYA") }
+                      Spacer(Modifier.height(16.dp))
+                      Text(r)
                     }
                   }
                 }
               }
             }
           }
-          EOF
-          
-          cat > gradle/wrapper/gradle-wrapper.properties <<'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.6-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-          curl -sL https://github.com/gradle/gradle/raw/v8.6.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
-          echo '#!/usr/bin/env sh
-          DIR="$(cd "$(dirname "$0")" && pwd)"
-          exec java -jar "$DIR/gradle/wrapper/gradle-wrapper.jar" "$@"' > gradlew
-          chmod +x gradlew
-
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+          KT
 
       - name: Build APK
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug --stacktrace
 
       - uses: actions/upload-artifact@v4
         with:
